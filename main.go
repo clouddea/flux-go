@@ -15,27 +15,6 @@ const (
 	ACTION_TODO_D = "ACTION_TODO_D"
 )
 
-// 定义自已的Stores
-var todoList []string
-
-var handlers = map[string]flux.Handler{
-	ACTION_TODO_C: func(store *flux.Store, action flux.Action) {
-		store.Data = append(store.Data.([]string), action.Payload.(string))
-	},
-	ACTION_TODO_D: func(store *flux.Store, action flux.Action) {
-		store.Data = make([]string, 0)
-	},
-}
-
-var controllers = []flux.Controller{
-	func(data any) {
-		line1 = fmt.Sprintf("data: %v", data)
-	},
-	func(data any) {
-		line2 = fmt.Sprintf("len : %v", len(data.([]string)))
-	},
-}
-
 // 定义一个全局的ActionCreator
 type GlobalActionCreator struct {
 	flux.AbstractActionCreator
@@ -59,8 +38,41 @@ var line2 string = "len : ##########"
 func main() {
 	tm.Clear()
 	actions := &GlobalActionCreator{}
-	store := flux.NewStore(todoList, handlers, controllers)
-	dispatcher := flux.NewFlux(actions, store)
+
+	store2 := flux.NewStore("count", 0, map[string]flux.Handler{
+		ACTION_TODO_C: func(flux flux.Dispatcher, store *flux.Store, action flux.Action) {
+			fmt.Println("update count add")
+			store.Data = store.Data.(int) + 1
+		},
+		ACTION_TODO_D: func(flux flux.Dispatcher, store *flux.Store, action flux.Action) {
+			fmt.Println("update count del")
+			store.Data = 0
+		},
+	}, []flux.Controller{
+		func(data any) {
+			line2 = fmt.Sprintf("len : %v", data)
+		},
+	})
+
+	store1 := flux.NewStore("todo", make([]string, 0),
+		map[string]flux.Handler{
+			ACTION_TODO_C: func(flux flux.Dispatcher, store *flux.Store, action flux.Action) {
+				flux.WaitFor("count")
+				fmt.Println("update todo add")
+				store.Data = append(store.Data.([]string), action.Payload.(string))
+			},
+			ACTION_TODO_D: func(flux flux.Dispatcher, store *flux.Store, action flux.Action) {
+				flux.WaitFor("count")
+				fmt.Println("update todo del")
+				store.Data = make([]string, 0)
+			},
+		}, []flux.Controller{
+			func(data any) {
+				line1 = fmt.Sprintf("data: %v", data)
+			},
+		})
+
+	dispatcher := flux.NewFlux(actions, store1, store2)
 
 	// put them(dispatcher and view) together
 	reader := bufio.NewReader(os.Stdin)

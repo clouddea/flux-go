@@ -25,5 +25,5 @@ go run .
 
 # TODOs
 
-+ [ ]  add `wait for` feature for the dispatcher
++ [x]  add `wait for` feature for the dispatcher
 
