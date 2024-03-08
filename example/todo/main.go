@@ -49,7 +49,7 @@ func main() {
 			store.Data = 0
 		},
 	}, []flux.Controller{
-		func(data any) {
+		func(flux flux.Dispatcher, store *flux.Store, data any) {
 			line2 = fmt.Sprintf("len : %v", data)
 		},
 	})
@@ -67,7 +67,7 @@ func main() {
 				store.Data = make([]string, 0)
 			},
 		}, []flux.Controller{
-			func(data any) {
+			func(flux flux.Dispatcher, store *flux.Store, data any) {
 				line1 = fmt.Sprintf("data: %v", data)
 			},
 		})

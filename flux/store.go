@@ -22,7 +22,7 @@ func NewStore(name string, data any, handlers map[string]Handler, controllers Co
 }
 
 // controller-view
-type Controller func(data any)
+type Controller func(flux Dispatcher, store *Store, data any)
 
 // view
 // view 应由用户自行定义，并由controller-view进行更新

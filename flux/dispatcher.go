@@ -1,5 +1,7 @@
 package flux
 
+import "time"
+
 /** action队列的大小 */
 const FLUX_QUEUE_SIZE = 1024
 
@@ -45,6 +47,10 @@ func (this *Flux) Actions() ActionCreator {
 	return this.actionCreator
 }
 
+func (this *Flux) Stores() map[string]*Store {
+	return this.stores
+}
+
 /*
 * dispatch 方法大部分情况下应该线程安全，实现方法如下
 法1：使用锁
@@ -54,6 +60,15 @@ func (this *Flux) Actions() ActionCreator {
 func (this *Flux) Dispatch(action Action) {
 	// 把action加入队列
 	this.queue <- action
+}
+
+func (this *Flux) DispatchSync(action Action) {
+	// 把action直接运行
+	this.pending = action
+	this.visit = make(map[string]bool)
+	for _, store := range this.stores {
+		this.visitStore(store)
+	}
 }
 
 func (this *Flux) comsumer() {
@@ -74,7 +89,7 @@ func (this *Flux) visitStore(store *Store) {
 		this.visit[store.Name] = true
 		handler(this, store, this.pending)
 		for _, controller := range store.Controllers {
-			controller(store.Data)
+			controller(this, store, store.Data)
 		}
 	}
 }
@@ -85,5 +100,12 @@ func (this *Flux) WaitFor(stores ...string) {
 		if store, ok := this.stores[storeName]; ok {
 			this.visitStore(store)
 		}
+	}
+}
+
+/** WaitSync 等待异步action全部结束 */
+func (this *Flux) WaitSync() {
+	for len(this.queue) != 0 {
+		time.Sleep(1 * time.Nanosecond)
 	}
 }
