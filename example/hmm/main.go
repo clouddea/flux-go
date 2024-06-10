@@ -33,8 +33,8 @@ func print2DArrayWithPrecision(array [][]float64, precision int) {
 }
 
 func main() {
-	nHiddenStates := 8
-	nObservedStates := 10
+	nHiddenStates := 7
+	nObservedStates := 8
 	A := make([][]float64, nHiddenStates)
 	AA := make([][]float64, nHiddenStates)
 	for i := 0; i < nHiddenStates; i++ {
@@ -75,9 +75,9 @@ func main() {
 		pi[i] /= sum
 	}
 
-	fmt.Printf("A=\n")
+	fmt.Printf("A =\n")
 	print2DArrayWithPrecision(A, 3)
-	fmt.Printf("B=\n")
+	fmt.Printf("B =\n")
 	print2DArrayWithPrecision(B, 3)
 	//fmt.Printf("pi=%v\n", pi)
 	//print2DArrayWithPrecision(pi, 3)
@@ -136,9 +136,9 @@ func main() {
 		}
 	}
 
-	fmt.Printf("AA=\n")
+	fmt.Printf("A (reconstructed) =\n")
 	print2DArrayWithPrecision(AA, 3)
-	fmt.Printf("BB=\n")
+	fmt.Printf("B (reconstructed) =\n")
 	print2DArrayWithPrecision(BB, 3)
 
 }
